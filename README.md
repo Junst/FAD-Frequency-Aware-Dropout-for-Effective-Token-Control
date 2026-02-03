@@ -10,6 +10,60 @@
 
 [切换到中文版](./README_zh.md)
 
+## Project Overview (FAD)
+
+This fork extends DiffSynth-Studio with **FAD (Frequency‑Aware Dropout)** for more controllable token behavior during LoRA training and evaluation. It adds training utilities, evaluation tooling, and job submission helpers tailored to FAD/sFAD experiments while keeping compatibility with the upstream DiffSynth pipelines (Flux, Qwen-Image, etc.).
+
+Key additions in this fork:
+- FAD/sFAD training support for targeted token control
+- Unified evaluation scripts (`tools/eval.py`) for InsightFace/CCIP and GPT-based scoring
+- Unified inference + metrics runner (`tools/infer.py`) for Flux/Qwen
+- Consolidated job submission helper (`tools/submit.py`)
+
+### Usage & Examples
+
+```bash
+# 1) Inference + metrics (Flux)
+python tools/infer.py infer \
+  --backend flux \
+  --lora-path /path/to/flux_lora/step-3000.safetensors \
+  --metadata-path /path/to/metadata.json \
+  --output-dir /path/to/output_images \
+  --results-file /path/to/results.json
+
+# 2) Similarity evaluation (InsightFace/CCIP)
+python tools/eval.py similarity \
+  --preset flux \
+  --dataset mbst \
+  --output-dir /path/to/eval_results
+
+# 3) GPT evaluation (requires OPENAI_API_KEY)
+export OPENAI_API_KEY="your_key_here"
+python tools/eval.py gpt \
+  --source flux \
+  --dataset mbst \
+  --variant normal \
+  --max-images 10
+
+# 4) Batch submission examples (SLURM)
+python tools/submit.py flux-infer
+python tools/submit.py gpt-eval --variants normal,fad_trig,fad_anch
+```
+
+### FAD/sFAD Training Examples
+
+```bash
+# Generate Flux training scripts (FAD/normal variants)
+python tools/submit.py train-scripts
+
+# Submit generated scripts (edit paths/partition if needed)
+bash scripts/generated/train/submit_all_flux.sh
+```
+
+### Upstream
+
+This repository is a fork of DiffSynth-Studio. If you only need the upstream engine and documentation, refer to the original DiffSynth-Studio docs below.
+
 ## Introduction
 
 Welcome to the magical world of Diffusion models! DiffSynth-Studio is an open-source Diffusion model engine developed and maintained by the [ModelScope Community](https://www.modelscope.cn/). We hope to foster technological innovation through framework construction, aggregate the power of the open-source community, and explore the boundaries of generative model technology!
@@ -769,4 +823,3 @@ https://github.com/Artiprocher/DiffSynth-Studio/assets/35051019/b54c05c5-d747-47
 https://github.com/Artiprocher/DiffSynth-Studio/assets/35051019/59fb2f7b-8de0-4481-b79f-0c3a7361a1ea
 
 </details>
-
